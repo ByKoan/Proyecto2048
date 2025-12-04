@@ -1,7 +1,6 @@
-package com.dam2.proyecto2048
+package com.dam2.proyecto2048.vistas
 
 import android.os.Bundle
-import android.os.PersistableBundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -9,7 +8,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.dam2.proyecto2048.databinding.GameBinding
 
 class Game : AppCompatActivity() {
-    lateinit var gameBinding: GameBinding;
+    lateinit var gameBinding: GameBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

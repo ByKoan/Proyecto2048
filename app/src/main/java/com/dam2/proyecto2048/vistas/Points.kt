@@ -1,4 +1,4 @@
-package com.dam2.proyecto2048
+package com.dam2.proyecto2048.vistas
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
