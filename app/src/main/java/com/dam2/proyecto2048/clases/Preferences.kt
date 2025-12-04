@@ -21,16 +21,17 @@ class Preferences(var context: Context) {
 
         puntosList.add(puntos)
 
-        Log.i("PREFS", "$puntosList")
-
         val jsonArray = JSONArray()
-        val jsonObject = JSONObject()
 
-        jsonObject.put("puntos", puntos.puntos)
-        jsonObject.put("fecha", puntos.fecha)
-        jsonObject.put("dificultad", puntos.dificultad)
+        for (puntos in puntosList){
+            val jsonObject = JSONObject()
 
-        jsonArray.put(jsonObject)
+            jsonObject.put("puntos", puntos.puntos)
+            jsonObject.put("fecha", puntos.fecha)
+            jsonObject.put("dificultad", puntos.dificultad)
+
+            jsonArray.put(jsonObject)
+        }
 
         prefs.edit().putString("puntos", jsonArray.toString()).commit()
     }
