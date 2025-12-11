@@ -3,8 +3,6 @@ package com.dam2.proyecto2048.vistas
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
-import android.view.DragEvent
 import android.view.GestureDetector
 import android.view.Gravity
 import android.view.MotionEvent
@@ -15,32 +13,39 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.dam2.proyecto2048.R
+import com.dam2.proyecto2048.clases.Preferences
+import com.dam2.proyecto2048.clases.Puntos
 import com.dam2.proyecto2048.clases.Tablero
 import com.dam2.proyecto2048.databinding.GameBinding
 import kotlin.math.abs
+import java.time.LocalDate
 
 class Game : AppCompatActivity() {
+
     lateinit var gameBinding: GameBinding
+    private var currentPuntos: Puntos? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         gameBinding = GameBinding.inflate(layoutInflater)
-
         enableEdgeToEdge()
         setContentView(gameBinding.main)
+
         ViewCompat.setOnApplyWindowInsetsListener(gameBinding.main) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
 
+        val dificultad = intent.getIntExtra("dificultad", 0)
+        Tablero.get().dificultad = dificultad
+
         Tablero.get().reset()
+        Tablero.get().spawnNewCells()
         Tablero.get().spawnNewCells()
 
         gestureBehavior()
-
         buttonBehavior()
         createBoard()
     }
@@ -48,7 +53,6 @@ class Game : AppCompatActivity() {
     @SuppressLint("ClickableViewAccessibility")
     private fun gestureBehavior() {
         val gridLayout = gameBinding.tablero
-
         val tablero = Tablero.get()
 
         val gestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
@@ -69,34 +73,20 @@ class Game : AppCompatActivity() {
                 val diffY = e2.y - e1.y
 
                 return when {
-                    // ---- DESLIZAMIENTO HORIZONTAL ----
-                    Math.abs(diffX) > Math.abs(diffY) -> {
-                        if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
-                            if (diffX > 0) {
-                                Log.i("GAME", "DESLIZADO DERECHA")
-                                tablero.move(Tablero.Direction.RIGHT)
-                                createBoard()
-                            } else {
-                                Log.i("GAME", "DESLIZADO IZQUIERDA")
-                                tablero.move(Tablero.Direction.LEFT)
-                                createBoard()
-                            }
+                    abs(diffX) > abs(diffY) -> {
+                        if (abs(diffX) > SWIPE_THRESHOLD && abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
+                            if (diffX > 0) tablero.move(Tablero.Direction.RIGHT)
+                            else tablero.move(Tablero.Direction.LEFT)
+                            createBoard()
                             true
                         } else false
                     }
 
-                    // ---- DESLIZAMIENTO VERTICAL ----
-                    Math.abs(diffY) > Math.abs(diffX) -> {
-                        if (Math.abs(diffY) > SWIPE_THRESHOLD && Math.abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
-                            if (diffY > 0) {
-                                Log.i("GAME", "DESLIZADO ABAJO")
-                                tablero.move(Tablero.Direction.DOWN)
-                                createBoard()
-                            } else {
-                                Log.i("GAME", "DESLIZADO ARRIBA")
-                                tablero.move(Tablero.Direction.UP)
-                                createBoard()
-                            }
+                    abs(diffY) > abs(diffX) -> {
+                        if (abs(diffY) > SWIPE_THRESHOLD && abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
+                            if (diffY > 0) tablero.move(Tablero.Direction.DOWN)
+                            else tablero.move(Tablero.Direction.UP)
+                            createBoard()
                             true
                         } else false
                     }
@@ -112,53 +102,76 @@ class Game : AppCompatActivity() {
         }
     }
 
-
     private fun buttonBehavior() {
-        val salirButton = gameBinding.salirButton
-
-        salirButton.setOnClickListener {
+        gameBinding.salirButton.setOnClickListener {
             finish()
         }
     }
 
-    private fun createBoard(){
-        var tableroView = gameBinding.tablero;
+    private fun createBoard() {
+        val tableroView = gameBinding.tablero
+        val tablero = Tablero.get()
 
-        var tablero = Tablero.get()
-        var lista2d = tablero.board
+        gameBinding.puntos.text = tablero.score.toString()
 
-        tableroView.removeAllViews() // Limpiar si es necesario
-
+        tableroView.removeAllViews()
         tableroView.columnCount = 4
         tableroView.rowCount = 4
 
-        for (i in 0 until lista2d.size) {
-            for (j in 0 until lista2d[i].size) {
+        for (i in 0 until 4) {
+            for (j in 0 until 4) {
+                val value = tablero.board[i][j]
                 val textView = TextView(this).apply {
-                    text = lista2d[i][j].toString()
+                    text = if (value == 0) "" else value.toString()
                     gravity = Gravity.CENTER
                     height = 160
                     width = 160
-                    setBackgroundColor(getColorForValue(lista2d[i][j]))
+                    setBackgroundColor(getColorForValue(value))
                     layoutParams = GridLayout.LayoutParams().apply {
                         columnSpec = GridLayout.spec(j, 1f)
                         rowSpec = GridLayout.spec(i, 1f)
                     }
                 }
-
-                if (textView.text == "0"){
-                    textView.text == ""
-                }
-
-
                 tableroView.addView(textView)
             }
         }
+
+        val prefs = Preferences(this)
+
+        if (currentPuntos == null) {
+            currentPuntos = Puntos(tablero.score, LocalDate.now(), tablero.dificultad)
+            prefs.saveOrUpdateCurrentScore(currentPuntos!!)
+        } else {
+            currentPuntos!!.puntos = tablero.score
+            prefs.saveOrUpdateCurrentScore(currentPuntos!!)
+        }
+
+        // Mensajes de victoria/derrota
+        if (tablero.hasWon()) {
+            showMessage("¡Has ganado!")
+            currentPuntos!!.puntos = tablero.score
+            prefs.saveOrUpdateCurrentScore(currentPuntos!!)
+            tablero.reset()
+            currentPuntos = null
+            createBoard()
+        } else if (tablero.isGameOver()) {
+            showMessage("¡Has perdido!")
+            currentPuntos!!.puntos = tablero.score
+            prefs.saveOrUpdateCurrentScore(currentPuntos!!)
+            tablero.reset()
+            currentPuntos = null
+            createBoard()
+        }
+    }
+
+
+    private fun showMessage(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
 
     private fun getColorForValue(value: Int): Int {
         return when (value) {
-            0 -> Color.parseColor("#CDC1B4")   // vacío
+            0 -> Color.parseColor("#CDC1B4")
             2 -> Color.parseColor("#EEE4DA")
             4 -> Color.parseColor("#EDE0C8")
             8 -> Color.parseColor("#F2B179")
@@ -170,7 +183,7 @@ class Game : AppCompatActivity() {
             512 -> Color.parseColor("#EDC850")
             1024 -> Color.parseColor("#EDC53F")
             2048 -> Color.parseColor("#EDC22E")
-            else -> Color.parseColor("#3C3A32") // números >2048
+            else -> Color.parseColor("#3C3A32")
         }
     }
 }

@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Proyecto2048</string>
+    <string-array name="dificultades">
+        <item>Fácil</item>
+        <item>Normal</item>
+        <item>Difícil</item>
+    </string-array>
+
 </resources>
