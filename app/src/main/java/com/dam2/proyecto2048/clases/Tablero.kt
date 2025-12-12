@@ -87,9 +87,9 @@ class Tablero {
 
     fun spawnNewCells() {
         val prob4 = when (dificultad) {
-            0 -> 0.15
+            0 -> 0.50
             1 -> 0.30
-            2 -> 0.50
+            2 -> 0.15
             else -> 0.30
         }
 

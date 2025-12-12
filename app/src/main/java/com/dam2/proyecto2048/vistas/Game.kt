@@ -2,6 +2,7 @@ package com.dam2.proyecto2048.vistas
 
 import android.annotation.SuppressLint
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.GestureDetector
@@ -11,6 +12,7 @@ import android.widget.GridLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -26,6 +28,7 @@ class Game : AppCompatActivity() {
     lateinit var gameBinding: GameBinding
     private var currentPuntos: Puntos? = null
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -61,6 +64,7 @@ class Game : AppCompatActivity() {
             private val SWIPE_THRESHOLD = 100
             private val SWIPE_VELOCITY_THRESHOLD = 100
 
+            @RequiresApi(Build.VERSION_CODES.O)
             override fun onFling(
                 e1: MotionEvent?,
                 e2: MotionEvent,
@@ -109,6 +113,7 @@ class Game : AppCompatActivity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun createBoard() {
         val tableroView = gameBinding.tablero
         val tablero = Tablero.get()

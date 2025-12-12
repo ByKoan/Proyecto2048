@@ -3,35 +3,22 @@ package com.dam2.proyecto2048.clases
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import org.json.JSONArray
 import org.json.JSONObject
 import java.time.LocalDate
+import androidx.core.content.edit
 
 class Preferences(var context: Context) {
     var prefs: SharedPreferences = context.getSharedPreferences("AppConfig", MODE_PRIVATE)
 
     fun clearPoints() {
-        prefs.edit().putString("puntos", """[]""").commit()
+        prefs.edit(commit = true) { putString("puntos", """[]""") }
     }
 
-    fun savePoint(puntos: Puntos) {
-        val puntosList = mutableListOf<Puntos>()
-        puntosList.addAll(getPointList())
-        puntosList.add(puntos)
-
-        val jsonArray = JSONArray()
-        for (p in puntosList) {
-            val jsonObject = JSONObject()
-            jsonObject.put("puntos", p.puntos)
-            jsonObject.put("fecha", p.fecha)
-            jsonObject.put("dificultad", p.dificultad)
-            jsonArray.put(jsonObject)
-        }
-
-        prefs.edit().putString("puntos", jsonArray.toString()).commit()
-    }
-
+    @RequiresApi(Build.VERSION_CODES.O)
     fun saveOrUpdateCurrentScore(puntos: Puntos) {
         val puntosList = mutableListOf<Puntos>()
         puntosList.addAll(getPointList())
@@ -57,9 +44,10 @@ class Preferences(var context: Context) {
             jsonArray.put(jsonObject)
         }
 
-        prefs.edit().putString("puntos", jsonArray.toString()).commit()
+        prefs.edit { putString("puntos", jsonArray.toString()) }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun getPointList(): List<Puntos> {
         val puntos = mutableListOf<Puntos>()
         val jsonArray = JSONArray(prefs.getString("puntos", """[]""")!!)
