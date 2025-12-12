@@ -3,6 +3,7 @@ package com.dam2.proyecto2048.clases
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
+import android.util.Log
 import org.json.JSONArray
 import org.json.JSONObject
 import java.time.LocalDate
@@ -38,6 +39,8 @@ class Preferences(var context: Context) {
         // Buscamos si ya existe puntuación de esta partida (dificultad actual y fecha de hoy)
         val today = puntos.fecha
         val index = puntosList.indexOfFirst { it.fecha == today && it.dificultad == puntos.dificultad }
+
+        Log.i("SAVE", "PUNTOS ${puntos.fecha}, ${puntos.dificultad}")
 
         if (index != -1) {
             puntosList[index].puntos = puntos.puntos // actualizamos

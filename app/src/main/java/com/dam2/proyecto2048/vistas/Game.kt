@@ -3,6 +3,7 @@ package com.dam2.proyecto2048.vistas
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.GestureDetector
 import android.view.Gravity
 import android.view.MotionEvent
@@ -149,18 +150,12 @@ class Game : AppCompatActivity() {
         // Mensajes de victoria/derrota
         if (tablero.hasWon()) {
             showMessage("¡Has ganado!")
-            currentPuntos!!.puntos = tablero.score
-            prefs.saveOrUpdateCurrentScore(currentPuntos!!)
             tablero.reset()
             currentPuntos = null
-            createBoard()
         } else if (tablero.isGameOver()) {
             showMessage("¡Has perdido!")
-            currentPuntos!!.puntos = tablero.score
-            prefs.saveOrUpdateCurrentScore(currentPuntos!!)
             tablero.reset()
             currentPuntos = null
-            createBoard()
         }
     }
 
